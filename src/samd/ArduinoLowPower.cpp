@@ -30,12 +30,16 @@ void ArduinoLowPowerClass::idle() {
 	SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
 	#if (SAMD21)
 	PM->SLEEP.reg = 2;
-	#elif (SAML21 || SAMR34)
-        PM->SLEEPCFG.reg = PM_SLEEPCFG_SLEEPMODE_IDLE;
-	#endif
 	__DSB();
 	__WFI();
-	
+
+	#elif (SAML21 || SAMR34)
+        PM->SLEEPCFG.reg = PM_SLEEPCFG_SLEEPMODE(0x2);
+	SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+        __DSB();
+        __WFI();
+        SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
+        #endif
 }
 
 void ArduinoLowPowerClass::idle(uint32_t millis) {
