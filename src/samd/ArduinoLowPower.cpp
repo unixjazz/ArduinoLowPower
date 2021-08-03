@@ -30,8 +30,8 @@ void ArduinoLowPowerClass::idle() {
 	SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
 	#if (SAMD21)
 	PM->SLEEP.reg = 2;
-	#elif (SAMR34)
-    PM->SLEEPCFG.reg = PM_SLEEPCFG_SLEEPMODE_IDLE;
+	#elif (SAML21 || SAMR34)
+        PM->SLEEPCFG.reg = PM_SLEEPCFG_SLEEPMODE_IDLE;
 	#endif
 	__DSB();
 	__WFI();
@@ -52,8 +52,8 @@ void ArduinoLowPowerClass::sleep() {
 	__WFI();
 	// Enable systick interrupt
 	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;	
-	#elif (SAMR34)
-    GCLK_GENCTRL_Type gclkConfig;
+	#elif (SAML21 || SAMR34)
+        GCLK_GENCTRL_Type gclkConfig;
 	gclkConfig.reg = 0;
 	gclkConfig.reg = GCLK->GENCTRL[0].reg;
 	gclkConfig.bit.SRC = GCLK_GENCTRL_SRC_OSC16M_Val;// GCLK_GENCTRL_SRC_OSCULP32K_Val ;//GCLK_GENCTRL_SRC_OSC16M_Val
@@ -206,23 +206,24 @@ void ArduinoLowPowerClass::attachInterruptWakeup(uint32_t pin, voidFuncPtr callb
 	attachInterrupt(pin, callback, mode);
     #if (SAMD21)
 	configGCLK6();
-	#endif
+    #endif
 
     #if (SAMD21)
 	// Enable wakeup capability on pin in case being used during sleep
 	EIC->WAKEUP.reg |= (1 << in);
-    #elif (SAMR34)
-    // Enable wakeup capability on pin in case being used during sleep
+    
+    #elif (SAML21 || SAMR34)
+        // Enable wakeup capability on pin in case being used during sleep
 	EIC->CTRLA.bit.CKSEL = 1; // use ULP32k as source ( SAML21 is different to D21 series, EIC can be set to use ULP32k without GCLK )
-    // Enable EIC
+        // Enable EIC
 	EIC->CTRLA.bit.ENABLE = 1;
-    while (EIC->SYNCBUSY.bit.ENABLE == 1) { /*wait for sync*/ }
+        while (EIC->SYNCBUSY.bit.ENABLE == 1) { /*wait for sync*/ }
 
 	/* Errata: Make sure that the Flash does not power all the way down
      	* when in sleep mode. */
- 	// NVMCTRL->CTRLB.bit.SLEEPPRM = NVMCTRL_CTRLB_SLEEPPRM_DISABLED_Val;
+ 	 //NVMCTRL->CTRLB.bit.SLEEPPRM = NVMCTRL_CTRLB_SLEEPPRM_DISABLED_Val;
 	 NVMCTRL->CTRLB.bit.SLEEPPRM =  NVMCTRL_CTRLB_SLEEPPRM_WAKEUPINSTANT_Val;
-	 #endif
+    #endif
 }
 
 #if (SAMD21)
