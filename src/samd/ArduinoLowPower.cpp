@@ -55,12 +55,12 @@ void ArduinoLowPowerClass::sleep() {
 	__DSB();
 	__WFI();
 	// Enable systick interrupt
-	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;	
+	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 	#elif (SAML21 || SAMR34)
         GCLK_GENCTRL_Type gclkConfig;
 	gclkConfig.reg = 0;
 	gclkConfig.reg = GCLK->GENCTRL[0].reg;
-	gclkConfig.bit.SRC = GCLK_GENCTRL_SRC_OSC16M_Val;// GCLK_GENCTRL_SRC_OSCULP32K_Val ;//GCLK_GENCTRL_SRC_OSC16M_Val
+	gclkConfig.bit.SRC = GCLK_GENCTRL_SRC_OSC16M_Val;
 	GCLK->GENCTRL[0].reg = gclkConfig.reg;
 	
 	while (GCLK->SYNCBUSY.reg & GCLK_SYNCBUSY_GENCTRL(0)) {
@@ -76,7 +76,6 @@ void ArduinoLowPowerClass::sleep() {
 		;
 	}
 
-
 	OSCCTRL_DFLLCTRL_Type dfllCtrlSlp;
 	dfllCtrlSlp.reg = OSCCTRL->DFLLCTRL.reg;
 	dfllCtrlSlp.bit.ENABLE = 0;
@@ -90,7 +89,6 @@ void ArduinoLowPowerClass::sleep() {
 		/* Wait for clock synchronization */
 	}
 	
-
 	// disable xosc32k clock
 	OSC32KCTRL->XOSC32K.reg &= ~OSC32KCTRL_XOSC32K_ENABLE;
 
@@ -152,7 +150,7 @@ void ArduinoLowPowerClass::sleep() {
 
 	gclkConfig.reg = 0;
 	gclkConfig.reg = GCLK->GENCTRL[0].reg;
-	gclkConfig.bit.SRC = GCLK_GENCTRL_SRC_DFLL48M_Val;
+	gclkConfig.bit.SRC = GCLK_GENCTRL_SRC_DPLL96M_Val;
 	GCLK->GENCTRL[0].reg = gclkConfig.reg;
 	while (GCLK->SYNCBUSY.reg & GCLK_SYNCBUSY_GENCTRL(0)) {
 		/* Wait for synchronization */
